@@ -9,6 +9,10 @@ import ru.mdimension.stand_bot.domain.CustomTimer;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
 import ru.mdimension.stand_bot.dto.User;
 
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev1;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
+import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
+import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 
 public class Util {
@@ -67,5 +71,42 @@ public class Util {
                 .button("Назад", START)
                 .endRow()
                 .build();
+    }
+
+    public static String getStatusText(String standName) {
+        String butName = standName + "\n"
+                + "Текущий статус: Свободен";
+
+        switch (standName) {
+            case "Dev 1": {
+                if (!StringUtils.isEmpty(dev1.getBookedUserName())) {
+                    butName = standName + "\n "
+                            + "Текущий статус: Занят ";
+                }
+            }
+            break;
+            case "Dev 2": {
+                if (!StringUtils.isEmpty(dev2.getBookedUserName())) {
+                    butName = standName + "\n "
+                            + "Текущий статус: Занят ";
+                }
+            }
+            break;
+            case "Test 1": {
+                if (!StringUtils.isEmpty(test1.getBookedUserName())) {
+                    butName = standName + "\n "
+                            + "Текущий статус: Занят ";
+                }
+            }
+            break;
+            case "Test 2": {
+                if (!StringUtils.isEmpty(test2.getBookedUserName())) {
+                    butName = standName + "\n "
+                            + "Текущий статус: Занят ";
+                }
+            }
+            break;
+        }
+        return butName;
     }
 }

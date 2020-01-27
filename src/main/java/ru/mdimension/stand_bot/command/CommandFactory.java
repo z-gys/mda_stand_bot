@@ -9,6 +9,8 @@ import ru.mdimension.stand_bot.command.menu.action.Start;
 import ru.mdimension.stand_bot.command.menu.action.Stop;
 import ru.mdimension.stand_bot.command.menu.stand.DEV1;
 import ru.mdimension.stand_bot.command.menu.stand.DEV2;
+import ru.mdimension.stand_bot.command.menu.stand.DEV3;
+import ru.mdimension.stand_bot.command.menu.stand.DEV4;
 import ru.mdimension.stand_bot.command.menu.stand.Test1;
 import ru.mdimension.stand_bot.command.menu.stand.Test2;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev3;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND;
@@ -27,6 +31,12 @@ import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND_STOP;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND_START;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND_STOP;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND_START;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND_STOP;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND_START;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND_STOP;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND_START;
@@ -69,6 +79,7 @@ public class CommandFactory {
 
         // commands are added here using lambdas. It is also possible to dynamically add commands without editing the code.
         cf.addCommand(START, (c) -> new MainMenu(dto).apply(chatId));
+
         cf.addCommand(DEV1_COMMAND, (c) -> new DEV1().apply(chatId));
         cf.addCommand(DEV1_COMMAND_START, (c) -> new Start(dto, dev1).apply(chatId));
         cf.addCommand(DEV1_COMMAND_STOP, (c) -> new Stop(dev1).apply(chatId));
@@ -76,6 +87,14 @@ public class CommandFactory {
         cf.addCommand(DEV2_COMMAND, (c) -> new DEV2().apply(chatId));
         cf.addCommand(DEV2_COMMAND_START, (c) -> new Start(dto, dev2).apply(chatId));
         cf.addCommand(DEV2_COMMAND_STOP, (c) -> new Stop(dev2).apply(chatId));
+
+        cf.addCommand(DEV3_COMMAND, (c) -> new DEV3().apply(chatId));
+        cf.addCommand(DEV3_COMMAND_START, (c) -> new Start(dto, dev3).apply(chatId));
+        cf.addCommand(DEV3_COMMAND_STOP, (c) -> new Stop(dev3).apply(chatId));
+
+        cf.addCommand(DEV4_COMMAND, (c) -> new DEV4().apply(chatId));
+        cf.addCommand(DEV4_COMMAND_START, (c) -> new Start(dto, dev4).apply(chatId));
+        cf.addCommand(DEV4_COMMAND_STOP, (c) -> new Stop(dev4).apply(chatId));
 
         cf.addCommand(TEST1_COMMAND, (c) -> new Test1().apply(chatId));
         cf.addCommand(TEST1_COMMAND_START, (c) -> new Start(dto, test1).apply(chatId));

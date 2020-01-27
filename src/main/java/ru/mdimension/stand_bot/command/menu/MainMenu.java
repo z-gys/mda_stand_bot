@@ -5,11 +5,15 @@ import ru.mdimension.stand_bot.command.Command;
 import ru.mdimension.stand_bot.config.InlineKeyboardBuilder;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
 
-import static ru.mdimension.stand_bot.ExampleBot.getStatusText;
+import static ru.mdimension.stand_bot.Util.getStatusText;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_COMMAND;
@@ -28,6 +32,12 @@ public class MainMenu implements Command {
                 .endRow()
                 .row()
                 .button(getStatusText(DEV2_NAME), DEV2_COMMAND)
+                .endRow()
+                .row()
+                .button(getStatusText(DEV3_NAME), DEV3_COMMAND)
+                .endRow()
+                .row()
+                .button(getStatusText(DEV4_NAME), DEV4_COMMAND)
                 .endRow()
                 .row()
                 .button(getStatusText(TEST1_NAME), TEST1_COMMAND)

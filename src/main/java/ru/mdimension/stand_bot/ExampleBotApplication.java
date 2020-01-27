@@ -35,6 +35,8 @@ public class ExampleBotApplication {
 
     public static CustomTimer dev1;
     public static CustomTimer dev2;
+    public static CustomTimer dev3;
+    public static CustomTimer dev4;
     public static CustomTimer test1;
     public static CustomTimer test2;
 
@@ -43,8 +45,10 @@ public class ExampleBotApplication {
 
 
     private void init() {
-        dev1 = new CustomTimer("dev1", rabbitMQService);
-        dev2 = new CustomTimer("dev2", rabbitMQService);
+        dev1 = new CustomTimer("Dev1", rabbitMQService);
+        dev2 = new CustomTimer("Dev2", rabbitMQService);
+        dev3 = new CustomTimer("Dev3", rabbitMQService);
+        dev4 = new CustomTimer("Dev4", rabbitMQService);
         test1 = new CustomTimer("Test1", rabbitMQService);
         test2 = new CustomTimer("Test2", rabbitMQService);
     }

@@ -6,7 +6,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -21,15 +20,16 @@ import ru.mdimension.stand_bot.dto.ShotUpdateDto;
 import ru.mdimension.stand_bot.service.RabbitMQService;
 import ru.mdimension.stand_bot.service.UserService;
 
-import static ru.mdimension.stand_bot.ExampleBotApplication.dev1;
-import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
-import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
-import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.Util.createDTO;
+import static ru.mdimension.stand_bot.Util.getStatusText;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
@@ -132,6 +132,12 @@ public class ExampleBot extends TelegramLongPollingBot {
                 .button(getStatusText(DEV2_NAME), DEV2_COMMAND)
                 .endRow()
                 .row()
+                .button(getStatusText(DEV3_NAME), DEV3_COMMAND)
+                .endRow()
+                .row()
+                .button(getStatusText(DEV4_NAME), DEV4_COMMAND)
+                .endRow()
+                .row()
                 .button(getStatusText(TEST1_NAME), TEST1_COMMAND)
                 .endRow()
                 .row()
@@ -146,40 +152,5 @@ public class ExampleBot extends TelegramLongPollingBot {
 
     }
 
-    public static String getStatusText(String standName) {
-        String butName = standName + "\n"
-                + "Текущий статус: Свободен";
 
-        switch (standName) {
-            case "Dev 1": {
-                if (!StringUtils.isEmpty(dev1.getBookedUserName())) {
-                    butName = standName + "\n "
-                            + "Текущий статус: Занят ";
-                }
-            }
-            break;
-            case "Dev 2": {
-                if (!StringUtils.isEmpty(dev2.getBookedUserName())) {
-                    butName = standName + "\n "
-                            + "Текущий статус: Занят ";
-                }
-            }
-            break;
-            case "Test 1": {
-                if (!StringUtils.isEmpty(test1.getBookedUserName())) {
-                    butName = standName + "\n "
-                            + "Текущий статус: Занят ";
-                }
-            }
-            break;
-            case "Test 2": {
-                if (!StringUtils.isEmpty(test2.getBookedUserName())) {
-                    butName = standName + "\n "
-                            + "Текущий статус: Занят ";
-                }
-            }
-            break;
-        }
-        return butName;
-    }
 }
