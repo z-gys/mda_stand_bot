@@ -8,7 +8,11 @@ import lombok.ToString;
 @Setter
 @ToString
 public class NotificationDTO {
-    private String standName;
     private long chatId;
-    private String timeLeftMessage;
+    private String notificationMessage;
+    private String standNameTitle;
+    //private CustomTimer customTimer;
+    private String timerCommand;
+    private String timerStopYesCommand;
+    private String timerStopNoCommand;
 }

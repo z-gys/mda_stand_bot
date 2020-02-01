@@ -2,27 +2,23 @@ package ru.mdimension.stand_bot.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Service
+@RequiredArgsConstructor
 public class RabbitMQService {
-
     private final Logger log = LoggerFactory.getLogger(RabbitMQService.class);
-
-    @Autowired
-    RabbitTemplate rabbitTemplate;
-    @Autowired
-    ObjectMapper objectMapper;
-
+    private final RabbitTemplate rabbitTemplate;
+    private final ObjectMapper objectMapper;
 
     public <T> T convertMessageBodyToObject(Message message, Class<T> cls) throws JsonConversionException {
         return convertMessageToObject(message, cls, null);

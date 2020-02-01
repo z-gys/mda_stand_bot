@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 public class RabbitMqConfig {
     @Bean
     public RabbitTemplate rabbitTemplate(CachingConnectionFactory connectionFactory) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        return rabbitTemplate;
+        return new RabbitTemplate(connectionFactory);
     }
 
     @Bean

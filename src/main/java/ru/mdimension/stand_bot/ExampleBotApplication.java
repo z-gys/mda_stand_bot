@@ -16,6 +16,13 @@ import ru.mdimension.stand_bot.service.RabbitMQService;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_NAME;
+
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = TelegramBotAutoConfiguration.class)
 public class ExampleBotApplication {
@@ -45,12 +52,12 @@ public class ExampleBotApplication {
 
 
     private void init() {
-        dev1 = new CustomTimer("Dev1", rabbitMQService);
-        dev2 = new CustomTimer("Dev2", rabbitMQService);
-        dev3 = new CustomTimer("Dev3", rabbitMQService);
-        dev4 = new CustomTimer("Dev4", rabbitMQService);
-        test1 = new CustomTimer("Test1", rabbitMQService);
-        test2 = new CustomTimer("Test2", rabbitMQService);
+        dev1 = new CustomTimer(DEV1_NAME, rabbitMQService, "/dev1");
+        dev2 = new CustomTimer(DEV2_NAME, rabbitMQService, "/dev2");
+        dev3 = new CustomTimer(DEV3_NAME, rabbitMQService, "/dev3");
+        dev4 = new CustomTimer(DEV4_NAME, rabbitMQService, "/dev4");
+        test1 = new CustomTimer(TEST1_NAME, rabbitMQService, "/test1");
+        test2 = new CustomTimer(TEST2_NAME, rabbitMQService, "/test2");
     }
 
     public static void main(String[] args) {

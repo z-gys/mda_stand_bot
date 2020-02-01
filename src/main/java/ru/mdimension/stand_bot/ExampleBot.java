@@ -18,23 +18,18 @@ import ru.mdimension.stand_bot.config.InlineKeyboardBuilder;
 import ru.mdimension.stand_bot.dto.NotificationDTO;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
 import ru.mdimension.stand_bot.service.RabbitMQService;
+import ru.mdimension.stand_bot.service.SendNotificationService;
 import ru.mdimension.stand_bot.service.UserService;
 
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev1;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev3;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
+import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
+import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.Util.createDTO;
 import static ru.mdimension.stand_bot.Util.getStatusText;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_NAME;
 
 
 @Component
@@ -67,19 +62,23 @@ public class ExampleBot extends TelegramLongPollingBot {
     @Autowired
     RabbitMQService rabbitMQService;
 
+    @Autowired
+    SendNotificationService sendNotificationService;
 
     @Override
     public void onUpdateReceived(Update update) {
         ShotUpdateDto dto = createDTO(update);
         if (update.hasMessage() && update.getMessage().getText().equals(START)) {
             userService.saveUserIfNotExist(update);
+            System.out.println("get update" + update.getMessage());
             mainMenu(update);
         }
         if (update.hasCallbackQuery()) {
             String callBackData = update.getCallbackQuery().getData();
+            System.out.println(callBackData);
             try {
-                CommandFactory cf = CommandFactory.init(dto.getChatId(), dto);
-                replaceMessage(dto, cf.executeCommand(callBackData, dto.getChatId(), dto));
+                CommandFactory cf = CommandFactory.init(dto.getChatId(), dto, sendNotificationService);
+                replaceMessage(dto, cf.executeCommand(callBackData, dto.getChatId()));
             } catch (NullPointerException ignored) {
             }
         }
@@ -87,20 +86,51 @@ public class ExampleBot extends TelegramLongPollingBot {
 
     @RabbitListener(queues = "stop")
     public void listen(Message dto) {
-        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
-        System.out.println("get timeLeftMessage" + objectFromMessage.toString());
-        check(objectFromMessage);
+        NotificationDTO message = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
+        sendMessage("Стенд " + message.getStandNameTitle() + " будет освобожден через " + message.getNotificationMessage(), message.getChatId());
     }
 
-    public void check(NotificationDTO dto) {
-        sendMessage("Стенд " + dto.getStandName() + " будет освобожден через " + dto.getTimeLeftMessage(), dto.getChatId());
+    @RabbitListener(queues = "timerStop")
+    public void listenStop(Message dto) {
+        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
+        SendMessage build = InlineKeyboardBuilder.create(objectFromMessage.getChatId())
+                .setText(objectFromMessage.getNotificationMessage())
+                .row()
+                .button("Освободить", objectFromMessage.getTimerStopYesCommand())
+                .button("Отказать", objectFromMessage.getTimerStopNoCommand())
+                .endRow()
+                .build();
+        sendMessage(build);
     }
+
+    @RabbitListener(queues = "timerStopYes")
+    public void listenTimerStopYes(Message dto) {
+        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
+        log.info("timerStopYes=" + objectFromMessage.toString());
+        sendMessage(objectFromMessage.getNotificationMessage(), objectFromMessage.getChatId());
+    }
+
+    @RabbitListener(queues = "timerStopNo")
+    public void listenTimerStopNo(Message dto) {
+        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
+        log.info("timerStopNo¬=" + objectFromMessage.toString());
+        sendMessage(objectFromMessage.getNotificationMessage(), objectFromMessage.getChatId());
+    }
+
 
     private void sendMessage(String messageText, long chatId) {
         try {
             SendMessage message = new SendMessage();
             message.setText(messageText);
             message.setChatId(chatId);
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessage(SendMessage message) {
+        try {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
@@ -124,24 +154,24 @@ public class ExampleBot extends TelegramLongPollingBot {
         Long chatId = update.getMessage().getChatId();
         SendMessage message = InlineKeyboardBuilder.create(chatId)
                 .setText("Привет, "
-                        + update.getMessage().getFrom().getFirstName() + " рад снова тебя видеть!")
+                        + update.getMessage().getFrom().getFirstName() + ", рад снова тебя видеть!")
                 .row()
-                .button(getStatusText(DEV1_NAME), DEV1_COMMAND)
+                .button(getStatusText(dev1.getNameTitle()), dev1.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(DEV2_NAME), DEV2_COMMAND)
+                .button(getStatusText(dev2.getNameTitle()), dev2.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(DEV3_NAME), DEV3_COMMAND)
+                .button(getStatusText(dev3.getNameTitle()), dev3.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(DEV4_NAME), DEV4_COMMAND)
+                .button(getStatusText(dev4.getNameTitle()), dev4.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(TEST1_NAME), TEST1_COMMAND)
+                .button(getStatusText(test1.getNameTitle()), test1.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(TEST2_NAME), TEST2_COMMAND)
+                .button(getStatusText(test2.getNameTitle()), test2.INFO_COMMAND)
                 .endRow()
                 .build();
         try {

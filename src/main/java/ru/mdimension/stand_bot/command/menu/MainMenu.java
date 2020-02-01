@@ -5,19 +5,13 @@ import ru.mdimension.stand_bot.command.Command;
 import ru.mdimension.stand_bot.config.InlineKeyboardBuilder;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
 
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev1;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev3;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
+import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
+import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.Util.getStatusText;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_NAME;
 
 public class MainMenu implements Command {
     private ShotUpdateDto updateDto;
@@ -26,24 +20,24 @@ public class MainMenu implements Command {
     public SendMessage apply(long chatId) {
         return InlineKeyboardBuilder.create(chatId)
                 .setText("Привет, "
-                        + updateDto.getCurrentUserFirstName() + " рад снова тебя видеть!")
+                        + updateDto.getCurrentUserFirstName() + ", рад снова тебя видеть!")
                 .row()
-                .button(getStatusText(DEV1_NAME), DEV1_COMMAND)
+                .button(getStatusText(dev1.getNameTitle()), dev1.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(DEV2_NAME), DEV2_COMMAND)
+                .button(getStatusText(dev2.getNameTitle()), dev2.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(DEV3_NAME), DEV3_COMMAND)
+                .button(getStatusText(dev3.getNameTitle()), dev3.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(DEV4_NAME), DEV4_COMMAND)
+                .button(getStatusText(dev4.getNameTitle()), dev4.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(TEST1_NAME), TEST1_COMMAND)
+                .button(getStatusText(test1.getNameTitle()), test1.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button(getStatusText(TEST2_NAME), TEST2_COMMAND)
+                .button(getStatusText(test2.getNameTitle()), test2.INFO_COMMAND)
                 .endRow()
                 .build();
     }

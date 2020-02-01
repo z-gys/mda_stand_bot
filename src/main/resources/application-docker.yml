@@ -1,0 +1,20 @@
+﻿bot:
+  token: 1038686725:AAHN7ODOL8AR7-zGDZ5nUAptWb-_DtUzUpw
+  username: MD_stand_bot
+spring:
+  data:
+    mongodb:
+      database: users
+      host: mongodb
+  rabbitmq:
+    host: rabbit
+    userName: user
+    password: bitnami
+proxy:
+  host: 79.143.180.10
+  port: 37289
+  user:
+  password:
+logging:
+  pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file: D:\Диск J\Рабочие проекты\telegram_bot_for_md\src\main\resources\log.log

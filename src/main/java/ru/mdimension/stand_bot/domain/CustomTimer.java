@@ -1,7 +1,9 @@
 package ru.mdimension.stand_bot.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import ru.mdimension.stand_bot.dto.NotificationDTO;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
@@ -14,57 +16,84 @@ import java.util.TimerTask;
 @Setter
 @Getter
 @Slf4j
+@ToString
 public class CustomTimer extends Stand {
+    @JsonIgnore
     private RabbitMQService rabbitMQService;
-    private String name;
+    @JsonIgnore
     private final Timer timer = new Timer();
     private LocalTime start;
     private LocalTime stop;
+    private StandAvaliableStatus standAvaliableStatus = StandAvaliableStatus.AVALIABLE;
+    private StandBusyStatus standBusyStatus = StandBusyStatus.STAND_FREE;
+    private boolean isSentNotification;
+
+    public String NOTIFICATION_STOP_REQUEST_COMMAND = "/notification/stop/request/";
+    public String NOTIFICATION_STOP_YES_COMMAND = "/notification/stop/yes/";
+    public String NOTIFICATION_STOP_NO_COMMAND = "/notification/stop/no/";
+    public String START_COMMAND = "/start/";
+    public String PROLONG_1HOUR_COMMAND = "/start/1/";
+    public String INFO_COMMAND = "/info/";
+    public String STOP_COMMAND = "/stop/";
 
     public void start(ShotUpdateDto dto) {
-        super.setBookedUserName(dto);
+        setBookedUserName(dto);
+        standBusyStatus = StandBusyStatus.STAND_BUSY;
         start = LocalTime.now();
         stop = LocalTime.now().plusHours(3);
+        isSentNotification = false;
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                stop = stop.minusSeconds(1);
-                if (timeLeft().compareTo(LocalTime.of(0, 10, 0, stop.getNano())) == 0) {
-                    log.info("send notification timeLeftMessage" + CustomTimer.super.getName());
+                log.info("Tic-tak" + getNameTitle());
+                if (LocalTime.now().isAfter(stop.minusMinutes(10)) && !isSentNotification) {
+                    log.info("send notification timeLeftMessage" + getNameTitle());
+                    isSentNotification = true;
                     sendTimeLeftNotification();
                 }
-                if (timeLeft().compareTo(LocalTime.of(0, 0, 0, stop.getNano())) == 0) {
-                    log.info("Timer stop for stand" + CustomTimer.super.getName());
+                if (LocalTime.now().isAfter(stop)) {
+                    log.info("Timer stop for stand" + getNameTitle());
                     stop();
-                    cancel();
                 }
             }
-        }, 0, 1000);
+        }, 1, 60000);
     }
 
+    public void prolong1Hour() {
+        isSentNotification = false;
+        stop = stop.plusHours(1);
+    }
+
+
     public void stop() {
-        super.setBookedUserName(null);
+        this.timer.purge();
+        standBusyStatus = StandBusyStatus.STAND_FREE;
+        setBookedUserName(null);
     }
 
     private void sendTimeLeftNotification() {
         NotificationDTO notificationDTO = new NotificationDTO();
-        notificationDTO.setChatId(super.getBookedUserName().getChatId());
-        notificationDTO.setTimeLeftMessage("10 минут");
-        notificationDTO.setStandName(this.name);
+        notificationDTO.setChatId(getBookedUserName().getChatId());
+        notificationDTO.setNotificationMessage("10 минут");
+        notificationDTO.setStandNameTitle(getNameTitle());
         log.info("convert" + notificationDTO.toString());
         rabbitMQService.convertAndSend("timer", "", notificationDTO);
     }
 
-    private LocalTime timeLeft() {
-        int minute = start.getMinute();
-        int hour = start.getHour();
-        int second = start.getSecond();
-        return stop.minusSeconds(second).minusHours(hour).minusMinutes(minute);
-    }
-
-    public CustomTimer(String name, RabbitMQService rabbitMQService) {
-        this.name = name;
+    public CustomTimer(String nameTitle, RabbitMQService rabbitMQService, String nameCommand) {
+        setNameTitle(nameTitle);
         this.rabbitMQService = rabbitMQService;
+        setNameCommand(nameCommand);
+
+        START_COMMAND = nameCommand + START_COMMAND;
+        INFO_COMMAND = nameCommand + INFO_COMMAND;
+        STOP_COMMAND = nameCommand + STOP_COMMAND;
+
+        PROLONG_1HOUR_COMMAND = nameCommand + PROLONG_1HOUR_COMMAND;
+
+        NOTIFICATION_STOP_REQUEST_COMMAND = nameCommand + NOTIFICATION_STOP_REQUEST_COMMAND;
+        NOTIFICATION_STOP_YES_COMMAND = nameCommand + NOTIFICATION_STOP_YES_COMMAND;
+        NOTIFICATION_STOP_NO_COMMAND = nameCommand + NOTIFICATION_STOP_NO_COMMAND;
     }
 }
 

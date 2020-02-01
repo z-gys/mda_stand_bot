@@ -5,11 +5,11 @@ spring:
   data:
     mongodb:
       database: users
-      host: mongodb
+      #host: mongodb
   rabbitmq:
-    host: rabbit
-    userName: user
-    password: bitnami
+   # host: rabbit
+   # userName: user
+   # password: bitnami
 proxy:
   host: 79.143.180.10
   port: 37289

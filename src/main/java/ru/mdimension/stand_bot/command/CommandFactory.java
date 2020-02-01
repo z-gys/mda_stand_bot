@@ -1,10 +1,11 @@
 package ru.mdimension.stand_bot.command;
 
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.mdimension.stand_bot.command.menu.MainMenu;
+import ru.mdimension.stand_bot.command.menu.action.Notification;
+import ru.mdimension.stand_bot.command.menu.action.Prolong;
 import ru.mdimension.stand_bot.command.menu.action.Start;
 import ru.mdimension.stand_bot.command.menu.action.Stop;
 import ru.mdimension.stand_bot.command.menu.stand.DEV1;
@@ -13,7 +14,9 @@ import ru.mdimension.stand_bot.command.menu.stand.DEV3;
 import ru.mdimension.stand_bot.command.menu.stand.DEV4;
 import ru.mdimension.stand_bot.command.menu.stand.Test1;
 import ru.mdimension.stand_bot.command.menu.stand.Test2;
+import ru.mdimension.stand_bot.dto.NotificationType;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
+import ru.mdimension.stand_bot.service.SendNotificationService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,47 +28,32 @@ import static ru.mdimension.stand_bot.ExampleBotApplication.dev3;
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_COMMAND_STOP;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND_STOP;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_COMMAND_STOP;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_COMMAND_STOP;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_COMMAND_STOP;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_COMMAND;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_COMMAND_STOP;
 
 @Component
-@CacheConfig(cacheNames = "message")
+@Slf4j
 public class CommandFactory {
-
-
     private final Map<String, Command> commands;
+    private final SendNotificationService notificationService;
 
-    protected CommandFactory() {
+    protected CommandFactory(SendNotificationService notificationService) {
         commands = new HashMap<>();
+        this.notificationService = notificationService;
     }
 
     public void addCommand(final String name, final Command command) {
         commands.put(name, command);
     }
 
-    @Cacheable
-    public SendMessage executeCommand(String name, long chatId, ShotUpdateDto dto) {
+    public SendMessage executeCommand(String name, long chatId) {
         if (commands.containsKey(name)) {
-            commands.get(name).apply(chatId);
+            return commands.get(name).apply(chatId);
+        } else {
+            SendMessage error = new SendMessage();
+            error.setChatId(chatId);
+            error.setText("Ой, такой команды я не знаю!");
+            return error;
         }
-        return commands.get(name).apply(chatId);
     }
 
     public void listCommands() {
@@ -73,37 +61,63 @@ public class CommandFactory {
     }
 
     /* Factory pattern */
-    public static CommandFactory init(long chatId, ShotUpdateDto dto) {
+    public static CommandFactory init(Long chatId, ShotUpdateDto dto, SendNotificationService notificationService) {
 
-        final CommandFactory cf = new CommandFactory();
+        final CommandFactory cf = new CommandFactory(notificationService);
 
         // commands are added here using lambdas. It is also possible to dynamically add commands without editing the code.
         cf.addCommand(START, (c) -> new MainMenu(dto).apply(chatId));
 
-        cf.addCommand(DEV1_COMMAND, (c) -> new DEV1().apply(chatId));
-        cf.addCommand(DEV1_COMMAND_START, (c) -> new Start(dto, dev1).apply(chatId));
-        cf.addCommand(DEV1_COMMAND_STOP, (c) -> new Stop(dev1).apply(chatId));
+        cf.addCommand(dev1.INFO_COMMAND, (c) -> new DEV1(dto).apply(chatId));
+        cf.addCommand(dev1.START_COMMAND, (c) -> new Start(dto, dev1).apply(chatId));
+        cf.addCommand(dev1.STOP_COMMAND, (c) -> new Stop(dev1).apply(chatId));
+        cf.addCommand(dev1.NOTIFICATION_STOP_REQUEST_COMMAND, (c) -> new Notification(dto, dev1, notificationService, NotificationType.REQUEST_STOP).apply(chatId));
+        cf.addCommand(dev1.NOTIFICATION_STOP_NO_COMMAND, (c) -> new Notification(dto, dev1, notificationService, NotificationType.STOP_NO).apply(chatId));
+        cf.addCommand(dev1.NOTIFICATION_STOP_YES_COMMAND, (c) -> new Notification(dto, dev1, notificationService, NotificationType.STOP_YES).apply(chatId));
+        cf.addCommand(dev1.PROLONG_1HOUR_COMMAND, (c) -> new Prolong(dev1).apply(chatId));
 
-        cf.addCommand(DEV2_COMMAND, (c) -> new DEV2().apply(chatId));
-        cf.addCommand(DEV2_COMMAND_START, (c) -> new Start(dto, dev2).apply(chatId));
-        cf.addCommand(DEV2_COMMAND_STOP, (c) -> new Stop(dev2).apply(chatId));
 
-        cf.addCommand(DEV3_COMMAND, (c) -> new DEV3().apply(chatId));
-        cf.addCommand(DEV3_COMMAND_START, (c) -> new Start(dto, dev3).apply(chatId));
-        cf.addCommand(DEV3_COMMAND_STOP, (c) -> new Stop(dev3).apply(chatId));
+        cf.addCommand(dev2.INFO_COMMAND, (c) -> new DEV2(dto).apply(chatId));
+        cf.addCommand(dev2.START_COMMAND, (c) -> new Start(dto, dev2).apply(chatId));
+        cf.addCommand(dev2.STOP_COMMAND, (c) -> new Stop(dev2).apply(chatId));
+        cf.addCommand(dev2.NOTIFICATION_STOP_REQUEST_COMMAND, (c) -> new Notification(dto, dev2, notificationService, NotificationType.REQUEST_STOP).apply(chatId));
+        cf.addCommand(dev2.NOTIFICATION_STOP_NO_COMMAND, (c) -> new Notification(dto, dev2, notificationService, NotificationType.STOP_NO).apply(chatId));
+        cf.addCommand(dev2.NOTIFICATION_STOP_YES_COMMAND, (c) -> new Notification(dto, dev2, notificationService, NotificationType.STOP_YES).apply(chatId));
+        cf.addCommand(dev2.PROLONG_1HOUR_COMMAND, (c) -> new Prolong(dev2).apply(chatId));
 
-        cf.addCommand(DEV4_COMMAND, (c) -> new DEV4().apply(chatId));
-        cf.addCommand(DEV4_COMMAND_START, (c) -> new Start(dto, dev4).apply(chatId));
-        cf.addCommand(DEV4_COMMAND_STOP, (c) -> new Stop(dev4).apply(chatId));
 
-        cf.addCommand(TEST1_COMMAND, (c) -> new Test1().apply(chatId));
-        cf.addCommand(TEST1_COMMAND_START, (c) -> new Start(dto, test1).apply(chatId));
-        cf.addCommand(TEST1_COMMAND_STOP, (c) -> new Stop(test1).apply(chatId));
+        cf.addCommand(dev3.INFO_COMMAND, (c) -> new DEV3(dto).apply(chatId));
+        cf.addCommand(dev3.START_COMMAND, (c) -> new Start(dto, dev3).apply(chatId));
+        cf.addCommand(dev3.STOP_COMMAND, (c) -> new Stop(dev3).apply(chatId));
+        cf.addCommand(dev3.NOTIFICATION_STOP_REQUEST_COMMAND, (c) -> new Notification(dto, dev3, notificationService, NotificationType.REQUEST_STOP).apply(chatId));
+        cf.addCommand(dev3.NOTIFICATION_STOP_NO_COMMAND, (c) -> new Notification(dto, dev3, notificationService, NotificationType.STOP_NO).apply(chatId));
+        cf.addCommand(dev3.NOTIFICATION_STOP_YES_COMMAND, (c) -> new Notification(dto, dev3, notificationService, NotificationType.STOP_YES).apply(chatId));
+        cf.addCommand(dev3.PROLONG_1HOUR_COMMAND, (c) -> new Prolong(dev3).apply(chatId));
 
-        cf.addCommand(TEST2_COMMAND, (c) -> new Test2().apply(chatId));
-        cf.addCommand(TEST2_COMMAND_START, (c) -> new Start(dto, test2).apply(chatId));
-        cf.addCommand(TEST2_COMMAND_STOP, (c) -> new Stop(test2).apply(chatId));
+        cf.addCommand(dev4.INFO_COMMAND, (c) -> new DEV4(dto).apply(chatId));
+        cf.addCommand(dev4.START_COMMAND, (c) -> new Start(dto, dev4).apply(chatId));
+        cf.addCommand(dev4.STOP_COMMAND, (c) -> new Stop(dev4).apply(chatId));
+        cf.addCommand(dev4.NOTIFICATION_STOP_REQUEST_COMMAND, (c) -> new Notification(dto, dev4, notificationService, NotificationType.REQUEST_STOP).apply(chatId));
+        cf.addCommand(dev4.NOTIFICATION_STOP_NO_COMMAND, (c) -> new Notification(dto, dev4, notificationService, NotificationType.STOP_NO).apply(chatId));
+        cf.addCommand(dev4.NOTIFICATION_STOP_YES_COMMAND, (c) -> new Notification(dto, dev4, notificationService, NotificationType.STOP_YES).apply(chatId));
+        cf.addCommand(dev4.PROLONG_1HOUR_COMMAND, (c) -> new Prolong(dev4).apply(chatId));
 
+
+        cf.addCommand(test1.INFO_COMMAND, (c) -> new Test1(dto).apply(chatId));
+        cf.addCommand(test1.START_COMMAND, (c) -> new Start(dto, test1).apply(chatId));
+        cf.addCommand(test1.STOP_COMMAND, (c) -> new Stop(test1).apply(chatId));
+        cf.addCommand(test1.NOTIFICATION_STOP_REQUEST_COMMAND, (c) -> new Notification(dto, test1, notificationService, NotificationType.REQUEST_STOP).apply(chatId));
+        cf.addCommand(test1.NOTIFICATION_STOP_NO_COMMAND, (c) -> new Notification(dto, test1, notificationService, NotificationType.STOP_NO).apply(chatId));
+        cf.addCommand(test1.NOTIFICATION_STOP_YES_COMMAND, (c) -> new Notification(dto, test1, notificationService, NotificationType.STOP_YES).apply(chatId));
+        cf.addCommand(test1.PROLONG_1HOUR_COMMAND, (c) -> new Prolong(test1).apply(chatId));
+
+        cf.addCommand(test2.INFO_COMMAND, (c) -> new Test2(dto).apply(chatId));
+        cf.addCommand(test2.START_COMMAND, (c) -> new Start(dto, test2).apply(chatId));
+        cf.addCommand(test2.STOP_COMMAND, (c) -> new Stop(test2).apply(chatId));
+        cf.addCommand(test2.NOTIFICATION_STOP_REQUEST_COMMAND, (c) -> new Notification(dto, test2, notificationService, NotificationType.REQUEST_STOP).apply(chatId));
+        cf.addCommand(test2.NOTIFICATION_STOP_NO_COMMAND, (c) -> new Notification(dto, test2, notificationService, NotificationType.STOP_NO).apply(chatId));
+        cf.addCommand(test2.NOTIFICATION_STOP_YES_COMMAND, (c) -> new Notification(dto, test2, notificationService, NotificationType.STOP_YES).apply(chatId));
+        cf.addCommand(test2.PROLONG_1HOUR_COMMAND, (c) -> new Prolong(test2).apply(chatId));
 
         return cf;
     }
