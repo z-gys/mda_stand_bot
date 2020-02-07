@@ -45,14 +45,11 @@ public class CustomTimer extends Stand {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                log.info("Tic-tak" + getNameTitle());
                 if (LocalTime.now().isAfter(stop.minusMinutes(10)) && !isSentNotification) {
-                    log.info("send notification timeLeftMessage" + getNameTitle());
                     isSentNotification = true;
                     sendTimeLeftNotification();
                 }
                 if (LocalTime.now().isAfter(stop)) {
-                    log.info("Timer stop for stand" + getNameTitle());
                     stop();
                 }
             }
@@ -76,6 +73,8 @@ public class CustomTimer extends Stand {
         notificationDTO.setChatId(getBookedUserName().getChatId());
         notificationDTO.setNotificationMessage("10 минут");
         notificationDTO.setStandNameTitle(getNameTitle());
+        notificationDTO.setTimerStopNoCommand(PROLONG_1HOUR_COMMAND);
+        notificationDTO.setTimerStopYesCommand(STOP_COMMAND);
         log.info("convert" + notificationDTO.toString());
         rabbitMQService.convertAndSend("timer", "", notificationDTO);
     }

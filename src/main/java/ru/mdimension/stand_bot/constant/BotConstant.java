@@ -2,6 +2,7 @@ package ru.mdimension.stand_bot.constant;
 
 public class BotConstant {
     public final static String START = "/start";
+    public final static String RESTART = "/restart";
 
     public final static String DEV1_NAME = "Dev 1";
     public final static String DEV1_COMMAND = "/dev1";

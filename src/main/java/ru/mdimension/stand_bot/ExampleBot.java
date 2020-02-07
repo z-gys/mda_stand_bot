@@ -29,11 +29,13 @@ import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.Util.createDTO;
 import static ru.mdimension.stand_bot.Util.getStatusText;
+import static ru.mdimension.stand_bot.constant.BotConstant.RESTART;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 
 
 @Component
 @Slf4j
+
 public class ExampleBot extends TelegramLongPollingBot {
 
     public ExampleBot(DefaultBotOptions options) {
@@ -57,13 +59,13 @@ public class ExampleBot extends TelegramLongPollingBot {
     }
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    RabbitMQService rabbitMQService;
+    private RabbitMQService rabbitMQService;
 
     @Autowired
-    SendNotificationService sendNotificationService;
+    private SendNotificationService sendNotificationService;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -87,7 +89,14 @@ public class ExampleBot extends TelegramLongPollingBot {
     @RabbitListener(queues = "stop")
     public void listen(Message dto) {
         NotificationDTO message = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
-        sendMessage("Стенд " + message.getStandNameTitle() + " будет освобожден через " + message.getNotificationMessage(), message.getChatId());
+        SendMessage build = InlineKeyboardBuilder.create(message.getChatId())
+                .setText("Стенд " + message.getStandNameTitle() + " будет освобожден через " + message.getNotificationMessage())
+                .row()
+                .button("Продлить на час", message.getTimerStopNoCommand())
+                .button("Освободить", message.getTimerStopYesCommand())
+                .endRow()
+                .build();
+        sendMessage(build);
     }
 
     @RabbitListener(queues = "timerStop")
@@ -172,6 +181,9 @@ public class ExampleBot extends TelegramLongPollingBot {
                 .endRow()
                 .row()
                 .button(getStatusText(test2.getNameTitle()), test2.INFO_COMMAND)
+                .endRow()
+                .row()
+                .button("Обновить", RESTART)
                 .endRow()
                 .build();
         try {

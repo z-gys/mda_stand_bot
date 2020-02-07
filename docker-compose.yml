@@ -10,10 +10,7 @@ services:
     depends_on:
       rabbit:
         condition: service_healthy
-      mongodb:
-        condition: service_started
     links:
-      - mongodb
       - rabbit
 
 
@@ -25,16 +22,9 @@ services:
     restart: on-failure
     healthcheck:
       test: "rabbitmqctl node_health_check"
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 3
     ports:
       - "5672:5672"
       - "15672:15672"
-
-  mongodb:
-    image: mongo:4.0.3
-    volumes:
-      - "${MDA_MONGODB_DATA:-./mongodb/data}:/data/db"
-    ports:
-      - "${MDA_MONGODB_PORT:-27017}:27017"

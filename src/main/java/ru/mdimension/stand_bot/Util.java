@@ -66,7 +66,7 @@ public class Util {
                 .build();
     }
 
-    public static SendMessage getSendMessage(long chatId, ShotUpdateDto dto, CustomTimer timer, String startCommand, String stopCommand) {
+    public static SendMessage getSendMessage(long chatId, ShotUpdateDto dto, CustomTimer timer) {
         SendMessage message;
         String currentUserFirstName = "";
         ShotUpdateDto shotUpdateDto = Optional.ofNullable(timer.getBookedUserName()).orElse(null);
@@ -77,7 +77,7 @@ public class Util {
 
         if (!currentUserFirstName.isEmpty() && dtoUserFirstName != null && !currentUserFirstName.equals(dtoUserFirstName)) {
             message = InlineKeyboardBuilder.create(chatId)
-                    .setText("Стенд занят пользователем " + timer.getBookedUserName().getCurrentUserFirstName() + ", \n" +
+                    .setText("Стенд " + timer.getNameTitle() + " занят пользователем " + timer.getBookedUserName().getCurrentUserFirstName() + ", \n" +
                             "освободится в " + timer.getStop().format(DateTimeFormatter.ofPattern("HH:mm")))
                     .row()
                     .button("Попросить освободить", timer.NOTIFICATION_STOP_REQUEST_COMMAND)
@@ -89,7 +89,7 @@ public class Util {
 
         } else if (!currentUserFirstName.isEmpty() && currentUserFirstName.equals(dtoUserFirstName)) {
             message = InlineKeyboardBuilder.create(chatId)
-                    .setText("Что хочешь сделать?")
+                    .setText("Стенд " + timer.getNameTitle() + " занят вами")
                     .row()
                     .button("Продлить на час", timer.PROLONG_1HOUR_COMMAND)
                     .endRow()
@@ -102,7 +102,7 @@ public class Util {
                     .build();
         } else {
             message = InlineKeyboardBuilder.create(chatId)
-                    .setText("Стенд свободен!")
+                    .setText("Стенд " + timer.getNameTitle() + " свободен!")
                     .row()
                     .button("Занять на 3 часа", timer.START_COMMAND)
                     .endRow()

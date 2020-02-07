@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.mdimension.stand_bot.command.menu.MainMenu;
 import ru.mdimension.stand_bot.command.menu.action.Notification;
 import ru.mdimension.stand_bot.command.menu.action.Prolong;
+import ru.mdimension.stand_bot.command.menu.action.Restart;
 import ru.mdimension.stand_bot.command.menu.action.Start;
 import ru.mdimension.stand_bot.command.menu.action.Stop;
 import ru.mdimension.stand_bot.command.menu.stand.DEV1;
@@ -28,6 +29,7 @@ import static ru.mdimension.stand_bot.ExampleBotApplication.dev3;
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
+import static ru.mdimension.stand_bot.constant.BotConstant.RESTART;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 
 @Component
@@ -67,6 +69,7 @@ public class CommandFactory {
 
         // commands are added here using lambdas. It is also possible to dynamically add commands without editing the code.
         cf.addCommand(START, (c) -> new MainMenu(dto).apply(chatId));
+        cf.addCommand(RESTART, (c) -> new Restart(dto).apply(chatId));
 
         cf.addCommand(dev1.INFO_COMMAND, (c) -> new DEV1(dto).apply(chatId));
         cf.addCommand(dev1.START_COMMAND, (c) -> new Start(dto, dev1).apply(chatId));

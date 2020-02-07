@@ -1,4 +1,4 @@
-package ru.mdimension.stand_bot.command.menu;
+package ru.mdimension.stand_bot.command.menu.action;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.mdimension.stand_bot.command.Command;
@@ -12,9 +12,9 @@ import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.Util.getStatusText;
-import static ru.mdimension.stand_bot.constant.BotConstant.RESTART;
+import static ru.mdimension.stand_bot.constant.BotConstant.START;
 
-public class MainMenu implements Command {
+public class Restart implements Command {
     private ShotUpdateDto updateDto;
 
     @Override
@@ -41,12 +41,12 @@ public class MainMenu implements Command {
                 .button(getStatusText(test2.getNameTitle()), test2.INFO_COMMAND)
                 .endRow()
                 .row()
-                .button("Обновить", RESTART)
+                .button("Обновить", START)
                 .endRow()
                 .build();
     }
 
-    public MainMenu(ShotUpdateDto dto) {
+    public Restart(ShotUpdateDto dto) {
         this.updateDto = dto;
     }
 }

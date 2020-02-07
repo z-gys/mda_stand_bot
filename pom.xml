@@ -74,18 +74,18 @@
             <version>2.2.4.RELEASE</version>
         </dependency>
 
-        <!-- DB -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-            <version>1.5.7.RELEASE</version>
-        </dependency>
+<!--        &lt;!&ndash; DB &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-data-mongodb</artifactId>-->
+<!--            <version>1.5.7.RELEASE</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>3.8.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mongodb</groupId>-->
+<!--            <artifactId>mongo-java-driver</artifactId>-->
+<!--            <version>3.8.0</version>-->
+<!--        </dependency>-->
 
         <!-- LOMBOK -->
         <dependency>

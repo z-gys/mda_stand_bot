@@ -7,8 +7,6 @@ import ru.mdimension.stand_bot.dto.ShotUpdateDto;
 
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
 import static ru.mdimension.stand_bot.Util.getSendMessage;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND_START;
-import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_COMMAND_STOP;
 
 @EqualsAndHashCode
 public class DEV2 implements Command {
@@ -16,7 +14,7 @@ public class DEV2 implements Command {
 
     @Override
     public SendMessage apply(long chatId) {
-        return getSendMessage(chatId, updateDto, dev2, DEV2_COMMAND_START, DEV2_COMMAND_STOP);
+        return getSendMessage(chatId, updateDto, dev2);
     }
 
     public DEV2(ShotUpdateDto dto) {
