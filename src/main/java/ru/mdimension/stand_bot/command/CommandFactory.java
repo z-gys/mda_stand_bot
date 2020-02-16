@@ -1,6 +1,5 @@
 package ru.mdimension.stand_bot.command;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.mdimension.stand_bot.command.menu.MainMenu;
@@ -33,7 +32,6 @@ import static ru.mdimension.stand_bot.constant.BotConstant.RESTART;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 
 @Component
-@Slf4j
 public class CommandFactory {
     private final Map<String, Command> commands;
     private final SendNotificationService notificationService;

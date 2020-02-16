@@ -1,6 +1,5 @@
 package ru.mdimension.stand_bot;
 
-import com.github.xabgesagtx.bots.TelegramBotAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -22,7 +21,7 @@ import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_NAME;
 
-@SpringBootApplication(exclude = TelegramBotAutoConfiguration.class)
+@SpringBootApplication()
 public class ExampleBotApplication {
 
 
