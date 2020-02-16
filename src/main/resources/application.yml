@@ -1,6 +1,6 @@
 ﻿bot:
-  token: 1038686725:AAHN7ODOL8AR7-zGDZ5nUAptWb-_DtUzUpw
-  username: MD_stand_bot
+  token: ${BOT_TOKEN:1038686725:AAHN7ODOL8AR7-zGDZ5nUAptWb-_DtUzUpw}
+  username: ${BOT_NAME:MD_stand_bot}
 spring:
   rabbitmq:
   # host: rabbit

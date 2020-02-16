@@ -15,4 +15,5 @@ public class NotificationDTO {
     private String timerCommand;
     private String timerStopYesCommand;
     private String timerStopNoCommand;
+    private NotificationCommand command;
 }
