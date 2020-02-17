@@ -1,10 +1,8 @@
 package ru.mdimension.stand_bot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,7 +15,6 @@ import ru.mdimension.stand_bot.command.CommandFactory;
 import ru.mdimension.stand_bot.config.InlineKeyboardBuilder;
 import ru.mdimension.stand_bot.dto.NotificationDTO;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
-import ru.mdimension.stand_bot.service.RabbitMQService;
 import ru.mdimension.stand_bot.service.SendNotificationService;
 import ru.mdimension.stand_bot.service.UserService;
 
@@ -38,8 +35,10 @@ import static ru.mdimension.stand_bot.constant.BotConstant.START;
 
 public class ExampleBot extends TelegramLongPollingBot {
 
-    public ExampleBot(DefaultBotOptions options) {
+    public ExampleBot(DefaultBotOptions options, UserService userService, SendNotificationService sendNotificationService) {
         super(options);
+        this.userService = userService;
+        this.sendNotificationService = sendNotificationService;
     }
 
     @Value("${bot.token}")
@@ -58,14 +57,9 @@ public class ExampleBot extends TelegramLongPollingBot {
         return username;
     }
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private RabbitMQService rabbitMQService;
-
-    @Autowired
-    private SendNotificationService sendNotificationService;
+    private final SendNotificationService sendNotificationService;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -86,44 +80,63 @@ public class ExampleBot extends TelegramLongPollingBot {
         }
     }
 
-    @RabbitListener(queues = "stop")
-    public void listen(Message dto) {
-        NotificationDTO message = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
-        SendMessage build = InlineKeyboardBuilder.create(message.getChatId())
-                .setText("Стенд " + message.getStandNameTitle() + " будет освобожден через " + message.getNotificationMessage())
+    @EventListener
+    public void listen(NotificationDTO notification) {
+        switch (notification.getCommand()) {
+            case STOP:
+                listenStop(notification);
+                break;
+            case TIMER:
+                listenTimer(notification);
+                break;
+            case TIMER_STOP:
+                listenTimerStop(notification);
+                break;
+            case  TIMER_STOP_YES:
+                listenTimerStopYes(notification);
+                break;
+            case TIMER_STOP_NO:
+                listenTimerStopNo(notification);
+                break;
+            default:
+                log.warn("New command detected: " + notification.getCommand());
+        }
+    }
+
+    private void listenTimer(NotificationDTO notification) {
+        log.info("I'm should send notification, but I wan't");
+    }
+
+    public void listenStop(NotificationDTO notification) {
+        SendMessage build = InlineKeyboardBuilder.create(notification.getChatId())
+                .setText("Стенд " + notification.getStandNameTitle() + " будет освобожден через " + notification.getNotificationMessage())
                 .row()
-                .button("Продлить на час", message.getTimerStopNoCommand())
-                .button("Освободить", message.getTimerStopYesCommand())
+                .button("Продлить на час", notification.getTimerStopNoCommand())
+                .button("Освободить", notification.getTimerStopYesCommand())
                 .endRow()
                 .build();
         sendMessage(build);
     }
 
-    @RabbitListener(queues = "timerStop")
-    public void listenStop(Message dto) {
-        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
-        SendMessage build = InlineKeyboardBuilder.create(objectFromMessage.getChatId())
-                .setText(objectFromMessage.getNotificationMessage())
+    public void listenTimerStop(NotificationDTO notification) {
+        SendMessage build = InlineKeyboardBuilder.create(notification.getChatId())
+                .setText(notification.getNotificationMessage())
                 .row()
-                .button("Освободить", objectFromMessage.getTimerStopYesCommand())
-                .button("Отказать", objectFromMessage.getTimerStopNoCommand())
+                .button("Освободить", notification.getTimerStopYesCommand())
+                .button("Отказать", notification.getTimerStopNoCommand())
                 .endRow()
                 .build();
         sendMessage(build);
     }
 
-    @RabbitListener(queues = "timerStopYes")
-    public void listenTimerStopYes(Message dto) {
-        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
-        log.info("timerStopYes=" + objectFromMessage.toString());
-        sendMessage(objectFromMessage.getNotificationMessage(), objectFromMessage.getChatId());
+    public void listenTimerStopYes(NotificationDTO notification) {
+        log.info("timerStopYes=" + notification.toString());
+        sendMessage(notification.getNotificationMessage(), notification.getChatId());
     }
 
-    @RabbitListener(queues = "timerStopNo")
-    public void listenTimerStopNo(Message dto) {
-        NotificationDTO objectFromMessage = rabbitMQService.getObjectFromMessage(dto, NotificationDTO.class);
-        log.info("timerStopNo¬=" + objectFromMessage.toString());
-        sendMessage(objectFromMessage.getNotificationMessage(), objectFromMessage.getChatId());
+    public void listenTimerStopNo(NotificationDTO notification) {
+        log.info("timerStopNo=" + notification.toString());
+        sendMessage(notification.getNotificationMessage(), notification.getChatId());
     }
 
 

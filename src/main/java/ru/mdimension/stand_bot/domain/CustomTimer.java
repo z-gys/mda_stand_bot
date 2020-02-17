@@ -5,9 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import ru.mdimension.stand_bot.dto.NotificationCommand;
 import ru.mdimension.stand_bot.dto.NotificationDTO;
 import ru.mdimension.stand_bot.dto.ShotUpdateDto;
-import ru.mdimension.stand_bot.service.RabbitMQService;
 
 import java.time.LocalTime;
 import java.util.Timer;
@@ -19,7 +20,7 @@ import java.util.TimerTask;
 @ToString
 public class CustomTimer extends Stand {
     @JsonIgnore
-    private RabbitMQService rabbitMQService;
+    private ApplicationEventPublisher eventPublisher;
     @JsonIgnore
     private final Timer timer = new Timer();
     private LocalTime start;
@@ -35,6 +36,22 @@ public class CustomTimer extends Stand {
     public String PROLONG_1HOUR_COMMAND = "/start/1/";
     public String INFO_COMMAND = "/info/";
     public String STOP_COMMAND = "/stop/";
+
+    public CustomTimer(String nameTitle, ApplicationEventPublisher eventPublisher, String nameCommand) {
+        setNameTitle(nameTitle);
+        this.eventPublisher = eventPublisher;
+        setNameCommand(nameCommand);
+
+        START_COMMAND = nameCommand + START_COMMAND;
+        INFO_COMMAND = nameCommand + INFO_COMMAND;
+        STOP_COMMAND = nameCommand + STOP_COMMAND;
+
+        PROLONG_1HOUR_COMMAND = nameCommand + PROLONG_1HOUR_COMMAND;
+
+        NOTIFICATION_STOP_REQUEST_COMMAND = nameCommand + NOTIFICATION_STOP_REQUEST_COMMAND;
+        NOTIFICATION_STOP_YES_COMMAND = nameCommand + NOTIFICATION_STOP_YES_COMMAND;
+        NOTIFICATION_STOP_NO_COMMAND = nameCommand + NOTIFICATION_STOP_NO_COMMAND;
+    }
 
     public void start(ShotUpdateDto dto) {
         setBookedUserName(dto);
@@ -61,7 +78,6 @@ public class CustomTimer extends Stand {
         stop = stop.plusHours(1);
     }
 
-
     public void stop() {
         this.timer.purge();
         standBusyStatus = StandBusyStatus.STAND_FREE;
@@ -75,24 +91,9 @@ public class CustomTimer extends Stand {
         notificationDTO.setStandNameTitle(getNameTitle());
         notificationDTO.setTimerStopNoCommand(PROLONG_1HOUR_COMMAND);
         notificationDTO.setTimerStopYesCommand(STOP_COMMAND);
+        notificationDTO.setCommand(NotificationCommand.TIMER);
         log.info("convert" + notificationDTO.toString());
-        rabbitMQService.convertAndSend("timer", "", notificationDTO);
-    }
-
-    public CustomTimer(String nameTitle, RabbitMQService rabbitMQService, String nameCommand) {
-        setNameTitle(nameTitle);
-        this.rabbitMQService = rabbitMQService;
-        setNameCommand(nameCommand);
-
-        START_COMMAND = nameCommand + START_COMMAND;
-        INFO_COMMAND = nameCommand + INFO_COMMAND;
-        STOP_COMMAND = nameCommand + STOP_COMMAND;
-
-        PROLONG_1HOUR_COMMAND = nameCommand + PROLONG_1HOUR_COMMAND;
-
-        NOTIFICATION_STOP_REQUEST_COMMAND = nameCommand + NOTIFICATION_STOP_REQUEST_COMMAND;
-        NOTIFICATION_STOP_YES_COMMAND = nameCommand + NOTIFICATION_STOP_YES_COMMAND;
-        NOTIFICATION_STOP_NO_COMMAND = nameCommand + NOTIFICATION_STOP_NO_COMMAND;
+        eventPublisher.publishEvent(notificationDTO);
     }
 }
 
