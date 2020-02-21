@@ -18,12 +18,18 @@ import static ru.mdimension.stand_bot.ExampleBotApplication.dev1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev2;
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev3;
 import static ru.mdimension.stand_bot.ExampleBotApplication.dev4;
+import static ru.mdimension.stand_bot.ExampleBotApplication.dev5;
+import static ru.mdimension.stand_bot.ExampleBotApplication.prerelease;
+import static ru.mdimension.stand_bot.ExampleBotApplication.stable;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test1;
 import static ru.mdimension.stand_bot.ExampleBotApplication.test2;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV1_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV2_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV3_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.DEV4_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.DEV5_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.PRERELEASE_NAME;
+import static ru.mdimension.stand_bot.constant.BotConstant.STABLE_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.START;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST1_NAME;
 import static ru.mdimension.stand_bot.constant.BotConstant.TEST2_NAME;
@@ -138,11 +144,20 @@ public class Util {
             case DEV4_NAME:
                 result = dev4;
                 break;
+            case DEV5_NAME:
+                result = dev5;
+                break;
             case TEST1_NAME:
                 result = test1;
                 break;
             case TEST2_NAME:
                 result = test2;
+                break;
+            case PRERELEASE_NAME:
+                result = prerelease;
+                break;
+            case STABLE_NAME:
+                result = stable;
                 break;
         }
         return result;
